@@ -3,13 +3,16 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"sync/atomic"
 )
 
-var id = 0
+var id atomic.Uint64
 
 func idHandler(w http.ResponseWriter, req *http.Request) {
-	id += 1
-	fmt.Fprintf(w, "%d", id)
+	// Can use here, but then have to make call to id.Load()
+	// id.Add(1)
+
+	fmt.Fprintf(w, "%d", id.Add(1))
 }
 
 func main() {
