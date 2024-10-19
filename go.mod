@@ -1,4 +1,4 @@
-module unique-ids-gen
+module unique.ids
 
 go 1.22.4
 

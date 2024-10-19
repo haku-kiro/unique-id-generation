@@ -1,33 +1,37 @@
 package main
 
 import (
-	"bufio"
 	"encoding/json"
 	"log"
-	"net/http"
-	"strconv"
+	"net/rpc"
 
 	maelstrom "github.com/jepsen-io/maelstrom/demo/go"
+	gen "unique.ids/internal/id-gen"
 )
 
-func getId() (int, error) {
-	resp, err := http.Get("http://localhost:8090/serve-id")
-	if err != nil {
-		return 0, err
-	}
-	defer resp.Body.Close()
+func idCall(c *rpc.Client) (uint64, error) {
+	req := gen.Request{}
+	resp := new(gen.Response)
 
-	// The id server should return just a single number, no other content.
-	scanner := bufio.NewScanner(resp.Body)
-	scanner.Scan()
-	data := scanner.Text()
-	return strconv.Atoi(data)
+	incrementCall := c.Go("Inc.Next", req, resp, nil)
+	reply := <-incrementCall.Done
+
+	if reply.Error != nil {
+		log.Fatalf("reply: %d, reply error: %s", resp.Id, reply.Error.Error())
+	}
+
+	return resp.Id, nil
 }
 
 func main() {
+	client, err := rpc.DialHTTP("tcp", "localhost:1234")
+	if err != nil {
+		log.Fatal("dialing:", err)
+	}
+
 	n := maelstrom.NewNode()
 	n.Handle("generate", func(msg maelstrom.Message) error {
-		id, err := getId()
+		id, err := idCall(client)
 		if err != nil {
 			return err
 		}
