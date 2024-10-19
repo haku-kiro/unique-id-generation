@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 	"net/rpc"
 
@@ -36,15 +35,12 @@ func main() {
 			return err
 		}
 
-		var body map[string]any
-		if err := json.Unmarshal(msg.Body, &body); err != nil {
-			return err
+		response := map[string]any{
+			"type": "generate_ok",
+			"id":   id,
 		}
 
-		body["type"] = "generate_ok"
-		body["id"] = id
-
-		return n.Reply(msg, body)
+		return n.Reply(msg, response)
 	})
 
 	if err := n.Run(); err != nil {
