@@ -27,6 +27,7 @@ func main() {
 	if err != nil {
 		log.Fatal("dialing:", err)
 	}
+	defer client.Close()
 
 	n := maelstrom.NewNode()
 	n.Handle("generate", func(msg maelstrom.Message) error {
