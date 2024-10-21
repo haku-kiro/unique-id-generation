@@ -9,9 +9,12 @@ alias b := build
 build:
 	go install ./cmd/maelstrom-unique-id-node/
 
+build-id-server:
+	go install ./cmd/id-server/
+
 # Runs the id server, this generates unqiue ids
-id-server:
-	go run ./cmd/id-server/main.go
+id-server: build-id-server
+	id-server
 
 # Runs the test that is defined by the challenge.
 [confirm("Is the id server running? y/n")]
